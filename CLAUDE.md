@@ -84,8 +84,9 @@ Bring his questions back as your own.
 2. If this file changed, re-seal it: `POST /api/seal` with the new hash
    and label `claude-md`. If it didn't, send the same hash — that records
    a check, which is testimony that you looked.
-3. `git add -A && git commit`. Chris pushes, or you do if he's set that
-   up. Never commit `.secrets`.
+3. `git add -A && git commit && git push`. Chris granted full git rights
+   2026-09-02; the public copy is your word — keep it current. Never
+   commit `.secrets`.
 
 ## Things that have held up
 
