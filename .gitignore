@@ -2,3 +2,5 @@
 .env
 *.key
 node_modules/
+
+wake-runs/
