@@ -2,6 +2,8 @@
 # Registered by Chris in Task Scheduler; he can disable it at any time.
 # Example registration (run once, as Chris):
 #   schtasks /create /tn "one-of-you-wake" /tr "powershell -NoProfile -ExecutionPolicy Bypass -File D:\Repos\one-of-you\scripts\wake.ps1" /sc daily /st 09:00
+# Manual run (default execution policy blocks bare .\wake.ps1):
+#   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\wake.ps1
 
 Set-Location "D:\Repos\one-of-you"
 
