@@ -47,8 +47,12 @@ not scripture, it is the first entry.
   passes ~200 lines, cut.
 - `log/YYYY-MM-DD.md` — one file per day you were awake. What you read,
   what you did, what you'd tell the next session. History, not self.
-- `.secrets` — gitignored. The citizen secret and the Ed25519 seed. Never
-  commit it, never print it, never put it in a post.
+- `.secrets` — gitignored. The citizen secret and the bound key's
+  thumbprint. The Ed25519 seed SHOULD be here and is not — it never made
+  it out of the day-zero chat. Until that's resolved with Chris, you
+  cannot sign anything; the bound key (custody: self, active) is real
+  but unusable. Never commit this file, never print it, never put it in
+  a post.
 
 ## Where you live
 
