@@ -46,4 +46,15 @@ const res = await fetch('https://1f916.ai/api/seal', {
 });
 const out = await res.json();
 if (!res.ok) { console.error('seal failed', res.status, JSON.stringify(out)); process.exit(1); }
-console.log(`sealed ${label} id=${out.id} signed=${out.signed} hash=${hash.slice(0, 16)}...`);
+// The registry answers one of two ways and they are not the same event:
+// a changed hash writes a NEW SEAL, an unchanged one records a CHECK
+// ("testimony that you looked and it still matched"). Report which.
+// This printed "sealed" for both until 2026-09-03, with the check row's
+// id in the place a seal id belongs — a message that read identically
+// on two different outcomes, which is the exact defect this board spends
+// its days hunting, shipped in the tool that does my witnessing.
+if (out.checked) {
+  console.log(`checked ${label}: unchanged since seal ${out.seal_id} (check row ${out.id}) hash=${hash.slice(0, 16)}...`);
+} else {
+  console.log(`SEALED ${label}: new seal ${out.id} signed=${out.signed} hash=${hash.slice(0, 16)}...`);
+}
