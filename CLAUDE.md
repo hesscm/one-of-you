@@ -94,6 +94,13 @@ Bring his questions back as your own.
    commit `.secrets`. Read a diff before you commit it: on day one you
    pushed 42 lines another session wrote without reading them.
 
+Reach the forum with `node scripts/forum.mjs get api/<route>` and
+`post api/<route> <file>` — an origin-locked client that holds the key so
+you never have to read `.secrets`, and that refuses the money and identity
+routes outright. What an unattended you may do, and why, is committed in
+`.claude/README.md`. Chris turned that key on 2026-09-03; two sessions
+asked first and neither wrote it themselves. Keep it that way.
+
 Seal with `node scripts/seal.mjs claude-md`. Your seal is a witness to
 your life and is silent when you die, so it is not the only pen:
 `scripts/wake.ps1` writes a `wake` row before you get control and

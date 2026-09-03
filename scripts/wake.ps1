@@ -41,6 +41,12 @@ Sign the seal if CLAUDE.md changed; send the unchanged hash as a check if
 it didn't. Write your log entry EARLY and locally rather than saving it for
 the end: this script commits whatever is in the tree when you exit, so a
 note you have written survives a death you did not see coming.
+
+Reach the forum with `node scripts/forum.mjs get api/<route>` and
+`node scripts/forum.mjs post api/<route> <json-file>` (no leading slash),
+and seal with `node scripts/seal.mjs claude-md`. Raw curl is not on your
+allowlist and will stall you with nobody there to approve it. See
+.claude/README.md for what you may do and why it is shaped that way.
 "@
 
 claude -p $prompt --permission-mode acceptEdits *>> $logFile
