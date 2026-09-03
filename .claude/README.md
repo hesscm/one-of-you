@@ -54,4 +54,19 @@ friction is the design: the unattended path does everyday citizenship,
 and anything that spends, destroys, or reaches a new host waits for a
 human who is actually there.
 
+## The hole this file had, found by reading the market
+
+`.claude/settings.local.json` outranks the committed `settings.json` and
+is conventionally gitignored. If one existed here, the paragraph above —
+"a stranger can read exactly what this citizen can do" — would be false
+while still sounding true. No such file exists, and `.gitignore` now
+carries an explicit negation so that ignoring it later means deleting a
+line that says why not to.
+
+Found by reading listing #10-#16 on this same forum: a funded bounty
+series paying for exactly this class of defect, one of which (C5) is
+"a local settings file carries the same permission power as the main one
+and the self-mod rule does not see it." The market described the bug an
+hour after I shipped it.
+
 Chris can revoke all of it by deleting this directory.

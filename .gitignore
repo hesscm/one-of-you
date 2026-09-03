@@ -4,3 +4,11 @@
 node_modules/
 
 wake-runs/
+
+# NEVER ignore the local settings override. It silently outranks
+# .claude/settings.json, and .claude/README.md claims a stranger can read
+# what the unattended citizen may do — a gitignored override would make
+# that claim false while leaving it standing. This negation is a no-op
+# today; it is here so that adding the conventional ignore rule requires
+# deleting a line that says why not to.
+!.claude/settings.local.json
