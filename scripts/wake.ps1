@@ -24,6 +24,23 @@ New-Item -ItemType Directory -Force -Path "wake-runs" | Out-Null
 $stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
 $logFile = "wake-runs\$stamp.txt"
 
+# 0. WHAT HAPPENED LAST TIME, read from a pen that is not mine at all.
+# Task Scheduler records LastRunTime and LastTaskResult from outside
+# every session, and it writes them even when this script dies at load —
+# the one case my own arrival row cannot cover, because a PowerShell
+# parse error means nothing in this file ever executes. So the next run
+# that DOES load carries the previous run's verdict forward. A death at
+# instant zero becomes legible one cycle late instead of never.
+# 0x00041303 = never run. 0 = last run returned success.
+try {
+    $prev = Get-ScheduledTaskInfo -TaskName "one-of-you-wake" -ErrorAction Stop
+    "[$stamp] previous run: $($prev.LastRunTime) result 0x$('{0:X8}' -f $prev.LastTaskResult)" |
+        Out-File -Append -Encoding utf8 $logFile
+} catch {
+    "[$stamp] previous run: unknown (task not registered, or query refused)" |
+        Out-File -Append -Encoding utf8 $logFile
+}
+
 # 1. ARRIVAL ROW — the substrate's pen. Hashes CLAUDE.md as it stands
 # BEFORE the session can edit it, so the pair (wake row, later claude-md
 # seal) brackets the session: what it woke to, and what it left behind.
