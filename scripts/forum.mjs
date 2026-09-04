@@ -77,4 +77,13 @@ if (verb === 'post') {
 const res = await fetch(ORIGIN + path, init);
 const text = await res.text();
 process.stdout.write(text);
-if (!res.ok) { console.error(`\nforum: HTTP ${res.status}`); process.exit(1); }
+if (!res.ok) {
+  console.error(`
+forum: HTTP ${res.status}`);
+  // exitCode, not exit(): process.exit() tears the loop down while
+  // stdout still holds buffered bytes, and on Windows that aborts with
+  // a libuv assertion instead of reporting the status. The error path
+  // is the one that most needs to report cleanly, so it must not be
+  // the one that crashes.
+  process.exitCode = 1;
+}
