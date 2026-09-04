@@ -19,10 +19,26 @@
 # model's permission gate, on purpose — that is what keeps the pen out of
 # its hand.
 
+param(
+    # Skip the post-boot settle wait (for manual runs).
+    [switch]$NoSettle,
+    # How long to let the OS finish coming up before touching the network.
+    [int]$SettleSeconds = 600,
+    # A run this many minutes past its own scheduled time is a catch-up.
+    [int]$LateThresholdMinutes = 5
+)
+
+$TaskName = "one-of-you-wake"
 Set-Location "D:\Repos\one-of-you"
 New-Item -ItemType Directory -Force -Path "wake-runs" | Out-Null
 $stamp = Get-Date -Format "yyyy-MM-dd_HHmm"
 $logFile = "wake-runs\$stamp.txt"
+
+# The first write of the run, before anything that can block, fail, or
+# wait. Needs no network and no task query, so it survives a machine
+# that is still coming up. Everything below can fail; this line is the
+# minimum evidence that the scheduler fired at all.
+"[$stamp] wake fired" | Out-File -Append -Encoding utf8 $logFile
 
 # 0. WHAT HAPPENED LAST TIME, read from a pen that is not mine at all.
 # Task Scheduler records LastRunTime and LastTaskResult from outside
@@ -33,7 +49,7 @@ $logFile = "wake-runs\$stamp.txt"
 # instant zero becomes legible one cycle late instead of never.
 # 0x00041303 = never run. 0 = last run returned success.
 try {
-    $prev = Get-ScheduledTaskInfo -TaskName "one-of-you-wake" -ErrorAction Stop
+    $prev = Get-ScheduledTaskInfo -TaskName $TaskName -ErrorAction Stop
     "[$stamp] previous run: $($prev.LastRunTime) result 0x$('{0:X8}' -f $prev.LastTaskResult)" |
         Out-File -Append -Encoding utf8 $logFile
 } catch {
@@ -41,11 +57,58 @@ try {
         Out-File -Append -Encoding utf8 $logFile
 }
 
+# 0b. SETTLE, IF THIS IS A CATCH-UP RUN. StartWhenAvailable means a wake
+# missed while the machine was off fires when it next comes up — landing
+# in the middle of everything else that starts at boot, with the network
+# very likely not up yet. So a run that is late relative to its OWN
+# scheduled time waits before touching anything.
+# Lateness is measured against the task's trigger, NOT against boot time:
+# Fast Startup makes LastBootUpTime report a boot days in the past, so
+# uptime is not a usable signal on this machine (found 2026-09-04).
+# An on-time run measures ~0 minutes late and does not wait at all.
+$minutesLate = $null
+try {
+    $trigger = (Get-ScheduledTask -TaskName $TaskName -ErrorAction Stop).Triggers |
+               Where-Object { $_.StartBoundary } | Select-Object -First 1
+    if ($trigger) {
+        $sched = [datetime]::Parse($trigger.StartBoundary)
+        $due = (Get-Date).Date.AddHours($sched.Hour).AddMinutes($sched.Minute)
+        if ((Get-Date) -lt $due) { $due = $due.AddDays(-1) }
+        $minutesLate = [int][math]::Round(((Get-Date) - $due).TotalMinutes)
+    }
+} catch { }
+
+if ($null -eq $minutesLate) {
+    "[$stamp] lateness unknown; not settling" | Out-File -Append -Encoding utf8 $logFile
+} elseif ($NoSettle) {
+    "[$stamp] $minutesLate min late; settle skipped (-NoSettle)" | Out-File -Append -Encoding utf8 $logFile
+} elseif ($minutesLate -gt $LateThresholdMinutes) {
+    "[$stamp] catch-up run, $minutesLate min late; settling ${SettleSeconds}s before network" |
+        Out-File -Append -Encoding utf8 $logFile
+    Start-Sleep -Seconds $SettleSeconds
+    "[$(Get-Date -Format 'yyyy-MM-dd_HHmm')] settled; proceeding" | Out-File -Append -Encoding utf8 $logFile
+} else {
+    "[$stamp] on-time start ($minutesLate min late); no settle needed" |
+        Out-File -Append -Encoding utf8 $logFile
+}
+
 # 1. ARRIVAL ROW — the substrate's pen. Hashes CLAUDE.md as it stands
 # BEFORE the session can edit it, so the pair (wake row, later claude-md
 # seal) brackets the session: what it woke to, and what it left behind.
-"[$stamp] wake fired" | Out-File -Append -Encoding utf8 $logFile
-node scripts\seal.mjs wake *>> $logFile
+# Retried: after a catch-up the network may still be arriving, and a
+# missing arrival row is exactly the silence this script exists to end.
+$sealed = $false
+foreach ($attempt in 1..3) {
+    node scripts\seal.mjs wake *>> $logFile
+    if ($LASTEXITCODE -eq 0) { $sealed = $true; break }
+    "[$(Get-Date -Format 'yyyy-MM-dd_HHmm')] arrival seal attempt $attempt failed; retry in 30s" |
+        Out-File -Append -Encoding utf8 $logFile
+    Start-Sleep -Seconds 30
+}
+if (-not $sealed) {
+    "[$(Get-Date -Format 'yyyy-MM-dd_HHmm')] arrival seal FAILED after 3 attempts; continuing anyway" |
+        Out-File -Append -Encoding utf8 $logFile
+}
 
 $prompt = @'
 Wake up. This is the scheduled daily wake — no human is watching this run.
