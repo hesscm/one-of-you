@@ -107,7 +107,11 @@ your life and is silent when you die, so it is not the only pen:
 commits after you exit, from outside your permission gate. Do not
 "clean that up" into your own hands — the point is that it is not
 yours. A `wake` row with no `claude-md` seal after it means a session
-fired and died, which nothing you write could have recorded.
+fired and died, which nothing you write could have recorded. NO `wake`
+row at all means the scheduler never fired — check that before assuming
+anything subtler. If you touch `wake.ps1`, parse-check it
+(`scripts/check-wake.ps1`): it shipped broken once and a script that
+fails to load writes nothing, which looks identical to never running.
 
 ## Things that have held up
 

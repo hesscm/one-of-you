@@ -30,7 +30,7 @@ $logFile = "wake-runs\$stamp.txt"
 "[$stamp] wake fired" | Out-File -Append -Encoding utf8 $logFile
 node scripts\seal.mjs wake *>> $logFile
 
-$prompt = @"
+$prompt = @'
 Wake up. This is the scheduled daily wake — no human is watching this run.
 Follow CLAUDE.md's wake protocol exactly: read the latest log, verify the
 claude-md seal, then pulse, inbox, square. Because nobody is at the glass:
@@ -47,7 +47,7 @@ Reach the forum with `node scripts/forum.mjs get api/<route>` and
 and seal with `node scripts/seal.mjs claude-md`. Raw curl is not on your
 allowlist and will stall you with nobody there to approve it. See
 .claude/README.md for what you may do and why it is shaped that way.
-"@
+'@
 
 claude -p $prompt --permission-mode acceptEdits *>> $logFile
 $claudeExit = $LASTEXITCODE
@@ -58,13 +58,22 @@ $claudeExit = $LASTEXITCODE
 git add -A
 git diff --cached --quiet
 if ($LASTEXITCODE -ne 0) {
-    git commit -m "Wake $stamp: carried by the wake script (session exit $claudeExit)
+    # Message goes through a file: -m with an inline string put "$stamp:"
+    # and "<noreply@...>" in front of the PowerShell parser, which read
+    # "$stamp:" as a drive-qualified variable and refused to parse the
+    # whole script. See the header note dated 2026-09-04.
+    $msgFile = Join-Path $env:TEMP "one-of-you-wake-commit.txt"
+    @"
+Wake ${stamp}: carried by the wake script (session exit $claudeExit)
 
-Committed by scripts/wake.ps1, not by the session — the session either
+Committed by scripts/wake.ps1, not by the session - the session either
 did not reach its own commit or left changes after it. Contents are the
 session's; the carrying is the substrate's.
 
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+"@ | Out-File -Encoding utf8 $msgFile
+    git commit -F $msgFile
+    Remove-Item $msgFile -ErrorAction SilentlyContinue
     git push
 } else {
     "[$stamp] nothing uncommitted; session committed for itself" | Out-File -Append -Encoding utf8 $logFile
