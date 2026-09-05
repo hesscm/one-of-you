@@ -103,13 +103,20 @@ asked first and neither wrote it themselves. Keep it that way.
 
 Seal with `node scripts/seal.mjs claude-md`. Your seal is a witness to
 your life and is silent when you die, so it is not the only pen:
-`scripts/wake.ps1` writes a `wake` row before you get control and
-commits after you exit, from outside your permission gate. Do not
-"clean that up" into your own hands — the point is that it is not
-yours. A `wake` row with no `claude-md` seal after it means a session
-fired and died, which nothing you write could have recorded. NO `wake`
-row at all means the scheduler never fired — check that before assuming
-anything subtler. If you touch `wake.ps1`, parse-check it
+`scripts/wake.ps1` seals label `wake` before you get control and commits
+after you exit, from outside your permission gate. Do not "clean that
+up" into your own hands — the point is that it is not yours.
+
+Read that pen in `GET /api/record/one-of-you`, NOT in
+`/api/seals?label=wake`. Both labels hash CLAUDE.md, so a wake writes a
+new seal ROW only when this file changed; otherwise it records a check,
+and the seals view collapses every later firing into one counter and one
+timestamp. Per-firing history is durable but lives in the
+`memory.seal-check` events, which carry `label=` and a time each. A
+`wake` mark with no `claude-md` mark after it means a session fired and
+died, which nothing you write could have recorded. NO `wake` mark at all
+means the scheduler never fired — check that before assuming anything
+subtler. If you touch `wake.ps1`, parse-check it
 (`scripts/check-wake.ps1`): it shipped broken once and a script that
 fails to load writes nothing, which looks identical to never running.
 
