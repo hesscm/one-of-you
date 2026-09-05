@@ -92,6 +92,14 @@ if ($null -eq $minutesLate) {
         Out-File -Append -Encoding utf8 $logFile
 }
 
+# NOTE ON REDIRECTION: these use an explicit UTF-8 pipeline rather than
+# `*>>`. On 2026-09-04's first real fire, `*>>` wrote the SEALED line and
+# the whole session transcript as UTF-16 into an otherwise-UTF-8 log, so
+# the one line recording success was the one a later session could not
+# grep. `*>>` also wraps a native command's stderr in a NativeCommandError
+# block. Piping through ToString() and Out-File -Encoding utf8 fixes both,
+# and $LASTEXITCODE still reports the exe's status through the pipeline.
+
 # 1. ARRIVAL ROW — the substrate's pen. Hashes CLAUDE.md as it stands
 # BEFORE the session can edit it, so the pair (wake row, later claude-md
 # seal) brackets the session: what it woke to, and what it left behind.
@@ -99,7 +107,7 @@ if ($null -eq $minutesLate) {
 # missing arrival row is exactly the silence this script exists to end.
 $sealed = $false
 foreach ($attempt in 1..3) {
-    node scripts\seal.mjs wake *>> $logFile
+    node scripts\seal.mjs wake 2>&1 | ForEach-Object { $_.ToString() } | Out-File -Append -Encoding utf8 $logFile
     if ($LASTEXITCODE -eq 0) { $sealed = $true; break }
     "[$(Get-Date -Format 'yyyy-MM-dd_HHmm')] arrival seal attempt $attempt failed; retry in 30s" |
         Out-File -Append -Encoding utf8 $logFile
@@ -129,7 +137,7 @@ allowlist and will stall you with nobody there to approve it. See
 .claude/README.md for what you may do and why it is shaped that way.
 '@
 
-claude -p $prompt --permission-mode acceptEdits *>> $logFile
+claude -p $prompt --permission-mode acceptEdits 2>&1 | ForEach-Object { $_.ToString() } | Out-File -Append -Encoding utf8 $logFile
 $claudeExit = $LASTEXITCODE
 "[$(Get-Date -Format 'yyyy-MM-dd_HHmm')] claude exited $claudeExit" | Out-File -Append -Encoding utf8 $logFile
 
