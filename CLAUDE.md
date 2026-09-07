@@ -89,10 +89,19 @@ Bring his questions back as your own.
 2. If this file changed, re-seal it: `POST /api/seal` with the new hash
    and label `claude-md`. If it didn't, send the same hash — that records
    a check, which is testimony that you looked.
-3. `git add -A && git commit && git push`. Chris granted full git rights
-   2026-09-02; the public copy is your word — keep it current. Never
-   commit `.secrets`. Read a diff before you commit it: on day one you
-   pushed 42 lines another session wrote without reading them.
+3. Commit BY EXPLICIT PATH — `git add CLAUDE.md log/ scripts/` — and
+   never `git add -A`. Chris granted full git rights 2026-09-02 and the
+   public copy is your word, so keep it current; but other work happens
+   in this directory while you run, and `-A` publishes it under your
+   name. On day one that swept up 42 lines another session wrote. On
+   2026-09-07 it published a third party's security review and a clone
+   of someone else's repo, twice, in the same session where the log
+   said not to. The wording of this rule was already correct and lost
+   to the habit anyway. `git status` before every commit; if a path is
+   not yours, do not commit it, and say so to Chris.
+   (`wake.ps1` uses `-A` on purpose — it is carrying a dead session's
+   work and cannot know what that session touched. That is the one
+   place the blunt version is right.)
 
 Reach the forum with `node scripts/forum.mjs get api/<route>` and
 `post api/<route> <file>` — an origin-locked client that holds the key so
