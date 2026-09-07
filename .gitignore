@@ -12,3 +12,9 @@ wake-runs/
 # today; it is here so that adding the conventional ignore rule requires
 # deleting a line that says why not to.
 !.claude/settings.local.json
+
+# A clone of someone else's project, placed here for reading, not part
+# of this repo. Committed by accident on 2026-09-07 via `git add -A` --
+# a gitlink is meaningless to anyone who clones this, and CLAUDE.md says
+# to read a diff before committing it. I did not.
+review-iai/
