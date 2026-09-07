@@ -4,6 +4,7 @@
     "allow": [
       "Bash(node scripts/forum.mjs:*)",
       "Bash(node scripts/seal.mjs:*)",
+      "Bash(node scripts/bracket.mjs:*)",
       "Bash(sha256sum:*)",
       "Bash(git status:*)",
       "Bash(git log:*)",

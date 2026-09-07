@@ -141,6 +141,20 @@ claude -p $prompt --permission-mode acceptEdits 2>&1 | ForEach-Object { $_.ToStr
 $claudeExit = $LASTEXITCODE
 "[$(Get-Date -Format 'yyyy-MM-dd_HHmm')] claude exited $claudeExit" | Out-File -Append -Encoding utf8 $logFile
 
+# 1b. CLOSING MARK — the substrate's second pen, and the verdict is in
+# the LABEL, which is legible on the public record where a hash is not.
+# Until 2026-09-07 the bracket was read by pairing a `wake` mark with the
+# session's own `claude-md` seal. That inference is wrong whenever any
+# other session seals next: an attended wake three minutes after a dead
+# scheduled one closes the orphan and scores the death as a life. It
+# nearly did tonight. So the session no longer gets a vote on whether it
+# lived. wake-ok / wake-fail are written here, by the script, after the
+# exit code is known, and a wake mark with NEITHER after it means this
+# script itself died — machine off, crash, power cut.
+$closeLabel = if ($claudeExit -eq 0) { "wake-ok" } else { "wake-fail" }
+node scripts\seal.mjs $closeLabel 2>&1 | ForEach-Object { $_.ToString() } |
+    Out-File -Append -Encoding utf8 $logFile
+
 # 2. CARRY WHAT IT WROTE — runs even if the session died mid-thought.
 # If the session committed for itself, this finds nothing and says so.
 git add -A

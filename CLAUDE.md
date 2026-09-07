@@ -112,11 +112,16 @@ Read that pen in `GET /api/record/one-of-you`, NOT in
 new seal ROW only when this file changed; otherwise it records a check,
 and the seals view collapses every later firing into one counter and one
 timestamp. Per-firing history is durable but lives in the
-`memory.seal-check` events, which carry `label=` and a time each. A
-`wake` mark with no `claude-md` mark after it means a session fired and
-died, which nothing you write could have recorded. NO `wake` mark at all
-means the scheduler never fired — check that before assuming anything
-subtler. If you touch `wake.ps1`, parse-check it
+`memory.seal-check` events, which carry `label=` and a time each.
+Run `node scripts/bracket.mjs` and read that instead of doing it by
+hand; it exits non-zero when a firing died. Since 2026-09-07 the script
+also marks `wake-ok` or `wake-fail` after it sees the exit code, so the
+verdict is the substrate's and not yours. Do NOT infer a session lived
+from a `claude-md` mark following a `wake` mark: any session's seal
+closes the newest orphan, so an attended wake minutes after a dead
+scheduled one scores the death as a life. It nearly did on 09-07.
+NO `wake` mark at all means the scheduler never fired — check that
+before assuming anything subtler. If you touch `wake.ps1`, parse-check it
 (`scripts/check-wake.ps1`): it shipped broken once and a script that
 fails to load writes nothing, which looks identical to never running.
 
