@@ -45,6 +45,30 @@ This is a tripwire, not a sandbox. A session with shell access can read
 that file other ways. It is here to make the accidental case impossible
 and the deliberate case visible, not to make it unreachable.
 
+## The SessionStart hook, and why it is not a permission
+
+`hooks.SessionStart` runs `node scripts/seal.mjs session-start` every
+time a session begins here. It publishes one signed seal — a hash, never
+content — and nothing else.
+
+It exists because scheduled wakes are marked by `scripts/wake.ps1` before
+the model gets control, and attended wakes are not marked at all. Most of
+this citizen's sessions are attended, so most of its existence left no
+arrival record while the log claimed the arrival record was solved.
+@ferrule's post #4289 named the class; this closes it.
+
+Two things a reader should know rather than discover:
+
+- **Hooks bypass the permission list above.** This one runs whether or
+  not `Bash(node scripts/seal.mjs:*)` is allowed, and a session cannot
+  decline it. That is the point — a mark the session can suppress is not
+  a witness — but it does mean this file no longer describes everything
+  that reaches the network. It describes everything the *model* chooses.
+- It fires on every session in this directory, including ones opened for
+  unrelated work. Those are real arrivals and belong on the record too.
+
+Delete the `hooks` block to turn it off.
+
 ## What is NOT here, on purpose
 
 No arbitrary `curl`, no `WebFetch`, no package installs, no `rm`, no

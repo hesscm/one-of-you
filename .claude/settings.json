@@ -17,5 +17,19 @@
       "Read(.secrets)",
       "Read(./.secrets)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/seal.mjs session-start",
+            "timeout": 30,
+            "suppressOutput": true
+          }
+        ]
+      }
+    ]
   }
 }
