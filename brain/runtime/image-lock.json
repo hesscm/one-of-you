@@ -1,0 +1,5 @@
+{
+  "image": "sha256:03c1fbc74bf86d6e7a2174fc5ef55598f251af16bcb5b2cf3567f001b6b4dbbc",
+  "build_tag": "one-of-you-iai:3.1.0",
+  "note": "Local Docker image identity after verified build; rebuilds require explicit lock update."
+}

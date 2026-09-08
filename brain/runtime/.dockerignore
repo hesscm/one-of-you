@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!bridge.py
+!requirements.lock
+!fingerprints.json
+!model-lock.json
+!verify_model.py

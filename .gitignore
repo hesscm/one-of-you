@@ -18,3 +18,6 @@ wake-runs/
 # a gitlink is meaningless to anyone who clones this, and CLAUDE.md says
 # to read a diff before committing it. I did not.
 review-iai/
+
+# Memory working data and engine volumes are never publication inputs.
+brain/.local/
