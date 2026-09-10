@@ -1,103 +1,54 @@
-# Pause assessment — 2026-09-07
+﻿# Brain status — 2026-09-09
 
-Implementation paused at Chris's request. This records the state reached in
-this development session; it does not claim a new resident wake or deployment.
+The local memory subsystem works. It requires an active agent to use it; it is
+not a background research loop. This assessment replaces the stale development
+pause snapshot. See WORKFLOW.md for the everyday session commands.
 
-Subsequently resumed at Chris's request: bounded Docker execution/output, exact
-per-invocation container cleanup, bounded ingestion batches, and mapping-boundary
-fault recovery are implemented and exercised. See SECURITY.md and
-runtime/VALIDATION.md. The assessment below remains the pause snapshot; backup,
-artifact pinning, baseline commits and real resident integration are still open.
+## Current verification
 
-Further progress: model byte hashes and exact runtime image selection are now in
-place. Labelled stopped-container recovery and an independent bridge alarm have
-passing live tests. Independent backups, commits, dependency review and actual
-resident integration remain unfinished. Read the latest validation/security
-entries rather than treating the original pause snapshot as current completion.
+- All 35 Node tests pass (32 existing plus three session workflow tests).
+- Sync imported 26 committed log sections; the store then contained 131 verified
+  records, all mapped into IAI. Subsequent session checkpoints add more records.
+- Docker runtime status and semantic recall work with Docker Desktop running.
+  Earlier missing-engine failures were environmental. Resume retains lexical
+  evidence and pending work when semantic recall fails.
+- Start, separate-process resume, checkpoint and close were exercised in the
+  actual store under an explicit Codex producer. Stale/conflicted writes are
+  refused; no automatic last-writer choice is introduced.
+- Resident commit 932568b reports manual workflow adoption and its first saved
+  run checkpoint. Automatic invocation in CLAUDE.md/hooks/wake.ps1 remains absent.
+- Implementation is tracked in Git. Authored memory in brain/.local remains
+  ignored and requires its own encrypted snapshot preservation.
 
-Encrypted recovery tooling is now implemented and exercised: 104 records and 40
-evidence objects restored locally; 32 tests pass. An independent backup still
-requires an external snapshot destination and separate recovery-key custody.
-Those locations have been requested, and no off-device transfer was performed.
+## What changed
 
-## Assessment
+session.mjs adds health, sync, resume, start, checkpoint and close. Health counts
+unimported committed log sections and pending/conflicted work. Sync publishes
+canonical imports before updating IAI, so a Docker failure does not lose imports.
+Resume combines lexical and optional semantic evidence. Session shortcuts save
+immediately with explicit producer and evidence/head IDs; detailed conclusions,
+new evidence, thread links and counterexamples still use the full work/record APIs.
 
-We have a functioning local memory subsystem, with portable evidence, live IAI
-retrieval, and working-state records. We do not yet have the minimally supervised
-research loop Chris wants. The main missing step is reliable use by the resident:
-resume, investigate, record new evidence, revise conclusions, checkpoint, and
-leave an attributable report for the next session.
+## Remaining limits
 
-IAI currently acts as a rebuildable retrieval index over our canonical records.
-We intentionally have not adopted upstream background reflection or automatic
-directive creation. That keeps authority separate from recalled content, but also
-means remembering and consolidating still require an active agent to invoke the
-workflow. More storage features alone will not close that gap.
+- Manual resident use is now evidenced, but a future unattended wake has not
+  demonstrated automatic resume/checkpoint/closure. Resident-owned startup files
+  were not changed by this Codex implementation; the dated log carries a handoff.
+- Two initial research threads were overdue at inspection. An overdue flag is a
+  review request, not a judgment that evidence is false. Other agents' active
+  runs are left alone.
+- Six developer recall queries previously scored 4/6 top-five expected passages
+  for both lexical and semantic search. Improved recall quality is not established.
+- Committed dated public logs are the only automatic ingestion source. Changed
+  documents can repeat unchanged sections; no scheduled import is enabled.
+- Canonical records are plaintext and public-only. Recalled content grants no
+  permissions; same-user compromise and model-level injection resistance are
+  not solved by the store's structural checks.
+- Encrypted recovery works locally. Off-device snapshot custody and separately
+  protected key custody remain unverified; Git does not back up local records.
+- Process/checkpoint tests do not prove power-loss durability or recovery from
+  every Docker/host failure. The semantic index is rebuildable from canonical data.
 
-## Implemented and exercised
-
-- 104 verified canonical records: 99 reported log episodes, three authored
-  interpretations/questions, and two working research threads.
-- Immutable source-linked records, explicit corrections, lexical search, bounded
-  briefings, export and merge restore with source Git history validation.
-- Live isolated IAI ingestion and semantic recall; restart/reimport idempotency;
-  mappings back to canonical records; no runtime networking or host secret mounts.
-- Working threads and run checkpoints with next actions, blockers, review dates,
-  counterevidence, stale-write rejection and visible concurrent branches.
-- Latest test run: 23 passed. Includes separate-clone/fresh-process restore,
-  process termination after checkpoint publication, and proposal security checks.
-- Security fixes: upstream plaintext replay caches suppressed, malformed proposal
-  contents withheld from errors, and proposal input capped before parsing.
-
-## Evidence limits
-
-The six-query development comparison gave both IAI and lexical search 4/6 expected
-passages in the top five. Semantic improvement is not established. These are
-handpicked historical cases, not a held-out society-research evaluation.
-
-The two research threads demonstrate the data/workflow, not completed research.
-No real resident session has yet demonstrated automatic resume and checkpoint
-use. Process-kill tests cover an already-published checkpoint; they do not prove
-mid-write durability, interrupted IAI transaction recovery, power-loss safety,
-or the resident's external Git recovery path.
-
-The last live IAI audit found no missing mappings, directives, full-passage cache
-matches, or legacy caches needing cleanup. This was a narrow check, not a complete
-security audit. Model-level injection resistance and hostile same-user isolation
-are not established. SECURITY.md records the unresolved risks.
-
-## Remaining work, in recommended order
-
-1. **Harden and preserve this baseline.** Bound Docker output/time and guarantee
-   cleanup; cap restore/ingest growth and batch safely; test interrupted ingestion.
-   Pin the model artifact and runtime image identity, review dependencies and
-   diagnostics. Review the explicit development paths and commit them when work
-   resumes. Establish a recoverable backup independent of the local working tree.
-2. **Integrate one real resident session.** Wire resume, run attribution, early
-   checkpoints and closure into the actual session lifecycle while preserving
-   the external scheduler's independent verdict. Define run-owned publication
-   and recovery manifests. Demonstrate a fresh session continuing unfinished work
-   without Chris manually supplying the context. Keep rollback/disable simple.
-3. **Prove recall usefulness.** Add held-out society questions, compare lexical,
-   semantic and combined retrieval, and assess whether corrections survive into
-   the final answer. Handle historical/current versions and repeated passages;
-   prevent retrieved derivatives from masquerading as independent corroboration.
-4. **Complete the research loop.** Add attributed external source snapshots,
-   actor/encounter distinctions and event times, hypothesis/counterexample updates,
-   and concise longitudinal reports. Run a real question through observation,
-   evidence, interpretation, correction and later-session follow-through.
-5. **Expand only after those checks.** Add scoped society adapters and practical
-   collection limits. Private/work use needs separate storage and credentials,
-   privacy-aware selection, encrypted backup/key recovery, and stronger leak tests.
-
-## What remains local
-
-The implementation is not committed: .gitignore is modified; brain/ and the
-Codex handoff log are untracked. Generated records/exports are ignored under
-brain/.local; IAI uses a local Docker volume. A Git clone alone currently carries
-neither these uncommitted implementation files nor later local authored memories.
-The model download also prevents a fully reproducible rebuild today.
-
-Resident operating instructions and scheduler were not modified, and no resident
-forum identity actions were taken. Implementation is paused; this assessment
-does not start services, publish changes, or advance another phase.
+Next: have the resident adopt the workflow in its own startup instructions and
+verify a later wake resumes unfinished work without a manually supplied cue.
+Keep scheduler outcome marks separate from the session's own completion claims.

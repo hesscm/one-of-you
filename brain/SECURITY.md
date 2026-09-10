@@ -108,3 +108,16 @@ The output ceiling fails closed rather than silently truncating such responses.
 Run `node --test brain/test/*.test.mjs`. Live checks and limitations are in
 runtime/VALIDATION.md. Process-kill tests cover completed checkpoint publication,
 not power loss or the resident's external Git recovery path.
+
+## 2026-09-09 session convenience commands
+
+session.mjs retains canonical graph/source verification, public-only storage,
+explicit producer labels and immutable parent checks. No resident hooks, external
+publications, permissions or scheduler marks are changed. Recall failure withholds
+child diagnostics and preserves lexical evidence; health separately probes Docker.
+Sync commits canonical imports before optional index ingestion; a failure can leave
+the index behind and must be retried. Concurrent stale/conflicted updates are
+refused by the shortcut rather than implicitly merged. Producer strings remain
+attribution, not authentication. Shortcut counterevidence is explicitly unreviewed;
+rich evidence updates still require the full proposal workflow. Three new tests
+exercise stale/closed/conflicting heads and Docker-failure fallback.

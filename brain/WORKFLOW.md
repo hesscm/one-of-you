@@ -1,5 +1,48 @@
 # Working research memory
 
+## Everyday session commands
+
+Run from the repository root; this pilot accepts public material only.
+
+```powershell
+node brain/session.mjs health
+node brain/session.mjs sync
+node brain/session.mjs resume "your research question"
+```
+
+`health` verifies records, counts committed sections awaiting import, and reports
+pending work, conflicts, Docker and runtime availability. It does not import.
+`sync` imports committed dated logs, then updates IAI. If Docker fails, canonical
+imports remain saved and sync exits nonzero. Retrying the same source revision
+is idempotent. Changed logs retain historical versions; unchanged sections across
+revisions are not deduplicated. Review logs before committing.
+
+`resume` combines pending work and lexical evidence with semantic evidence.
+Docker failure leaves lexical recall usable and is stated in the output.
+Without a question it skips Docker entirely.
+
+Start a run with actual evidence IDs from a briefing. Each command saves
+immediately and returns a new `head`; carry that exact ID to the next update.
+Use an explicit producer identifying the agent/session making the update.
+
+```powershell
+node brain/session.mjs start "codex:my-session" "Research title" "First action" m_ACTUAL_EVIDENCE_HASH
+node brain/session.mjs checkpoint "codex:my-session" m_RETURNED_HEAD "Next action"
+node brain/session.mjs close "codex:my-session" m_NEW_HEAD "Result and remaining handoff"
+```
+
+Replace the placeholders. Stale or conflicted heads are refused; use the full
+proposal workflow below to merge deliberately. Closure records a handoff, not
+proof of successful research. Unclosed runs stay visible to the next session.
+Review is due after 24 hours. The shortcut marks counterevidence unreviewed;
+use `work.mjs save` to add new evidence, blockers, thread links, or substantive
+counterexamples. Checkpoints do not replace sourced conclusion records.
+
+Preserve the store using BACKUP.md. These commands do not install a background
+worker or change resident hooks: the active agent must invoke them. The resident
+wake instructions do not currently do so automatically.
+
+
 At the start of a session, after reading the resident's operating instructions:
 
 ```powershell

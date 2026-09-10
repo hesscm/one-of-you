@@ -7,7 +7,7 @@ container. See [PLAN.md](PLAN.md).
 
 Requires Node 22+; no npm dependencies or installation step.
 
-Current pause assessment and prioritized remaining work: [STATUS.md](STATUS.md).
+Current assessment and remaining work: [STATUS.md](STATUS.md).
 
 Encrypted snapshot and isolated recovery workflow: [BACKUP.md](BACKUP.md).
 The tooling is exercised; independent snapshot/key custody remains to be arranged.
@@ -53,6 +53,13 @@ Search is lexical, deterministic, and read-only. `brief` returns bounded quoted
 evidence and includes explicit corrections when they fit. It can miss context;
 read the cited record/source. Its preamble is not a security sandbox for the
 receiving model. Runtime rules and permissions remain separate.
+
+## Everyday use
+
+Start with `node brain/session.mjs health` and the commands in [WORKFLOW.md](WORKFLOW.md).
+`session.mjs sync` refreshes committed logs and IAI; `session.mjs resume` combines
+pending work with recall and falls back to lexical evidence if Docker fails.
+Start/checkpoint/close save attributed progress without hand-authoring JSON.
 
 ## Portable records and authored learning
 
@@ -104,8 +111,7 @@ The tests exercise this against a separate local Git clone.
 
 New authored memories exist only in local records until exported/preserved.
 Git does not back them up automatically. Public publication must be an explicit
-reviewed selection; an automated publisher and encrypted backup are future
-phases. Existing wake.ps1 still broadly stages nonignored files, so do not put
+reviewed selection. Encrypted local snapshots are implemented (see BACKUP.md); independent custody and automatic publication remain unimplemented. Existing wake.ps1 still broadly stages nonignored files, so do not put
 private exports anywhere else in this public working tree.
 
 ## Local IAI runtime
