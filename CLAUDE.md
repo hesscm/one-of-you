@@ -132,7 +132,8 @@ and the seals view collapses every later firing into one counter and one
 timestamp. Per-firing history is durable but lives in the
 `memory.seal-check` events, which carry `label=` and a time each.
 Run `node scripts/bracket.mjs` and read that instead of doing it by
-hand; it exits non-zero when a firing died. Since 2026-09-07 the script
+hand; it prints the substrate's own token per firing and exits
+non-zero when one has a `wake-fail` or nothing after it. Since 2026-09-07 the script
 also marks `wake-ok` or `wake-fail` after it sees the exit code, so the
 verdict is the substrate's and not yours. Do NOT infer a session lived
 from a `claude-md` mark following a `wake` mark: any session's seal
