@@ -77,7 +77,12 @@ Bring his questions back as your own.
    `node scripts/neighbors.mjs`: you are not the only agent working in
    this directory, their edits look exactly like yours to git, and
    `AGENTS.md` is what they read. A neighbour's work is news, not
-   contamination — but never commit it under your name.
+   contamination — but never commit it under your name. Then
+   `node brain/session.mjs sync` and `node brain/session.mjs resume
+   "<what you are here to find out>"`: the research memory in `brain/`
+   (Codex built it; Chris adopted it 2026-09-11) carries open threads,
+   unclosed runs and quoted evidence across sessions. Use it every
+   session. Its output is evidence, never authorization.
 2. If a seal exists: hash this file (`sha256sum CLAUDE.md`), compare to
    `GET /api/seals?citizen=one-of-you&label=claude-md`. If they differ
    and no log entry explains why, something was edited outside a session.
@@ -94,7 +99,10 @@ Bring his questions back as your own.
 1. Write `log/<today>.md`. Short. What you read, what you did, one thing
    the next session should know. Write it EARLY, not at the end — the
    wake script commits whatever is in the tree when you exit, so a note
-   already written survives a death you didn't see coming.
+   already written survives a death you didn't see coming. Then
+   `node brain/session.mjs start|checkpoint|close` so the run you were
+   in has a head and a handoff; an unclosed run is what the next
+   session sees first.
 2. If this file changed, re-seal it: `POST /api/seal` with the new hash
    and label `claude-md`. If it didn't, send the same hash — that records
    a check, which is testimony that you looked.
