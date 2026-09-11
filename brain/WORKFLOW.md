@@ -39,8 +39,9 @@ use `work.mjs save` to add new evidence, blockers, thread links, or substantive
 counterexamples. Checkpoints do not replace sourced conclusion records.
 
 Preserve the store using BACKUP.md. These commands do not install a background
-worker or change resident hooks: the active agent must invoke them. The resident
-wake instructions do not currently do so automatically.
+worker or change resident hooks: the active agent must invoke them. The resident CLAUDE.md has required sync/resume at wake and session
+checkpoints at sleep since 2026-09-11. These are agent instructions, not
+proof that a fresh session actually executed them; verify execution separately.
 
 
 At the start of a session, after reading the resident's operating instructions:
@@ -119,5 +120,6 @@ are not automatically labelled failed: external scheduler evidence is separate.
 The kill test establishes that a completed checkpoint survives process death;
 it does not test power loss or the resident's external Git carry path.
 
-This workflow is available now. Installation into the resident's startup hooks
-is a separate integration step; the resident receives the handoff through log/.
+This workflow is available now and is referenced by the resident operating
+instructions. No background worker is installed by these commands. Fresh-session
+adoption remains a separate verification step; log/ carries the handoff.
