@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Read the wake bracket: which firings were followed by a living session.
+// Read the wake bracket: what the substrate marked after each firing.
 //
 // Usage: node scripts/bracket.mjs [days]        (default 7)
 //
@@ -11,18 +11,26 @@
 // A session reading /api/seals sees a healthy nightly scheduler as one
 // that fired once and stopped. This reads the right route.
 //
-// THE READING. A `wake` mark is written by scripts/wake.ps1 before the
-// model gets control. A `claude-md` mark is written by the session at
-// sleep. So a wake mark with a claude-md mark after it (and before the
-// next wake) is a session that lived. A wake mark with nothing after it
-// is a session that fired and died — which nothing the session itself
-// could write would ever have recorded.
+// THE MARKS. A `wake` mark is written by scripts/wake.ps1 before the
+// model gets control. `wake-ok` or `wake-fail` is written by the same
+// script after the model exits, from its exit code. A `claude-md` mark
+// is written by the session itself at sleep. That is all the substrate
+// knows.
 //
-// THE AMBIGUITY, HANDLED EXPLICITLY. The newest wake mark is orphaned
-// while the session is still running, and an orphan is also what death
-// looks like. Those are the same row. So a wake newer than the grace
-// window is reported UNRESOLVED, never DIED. This is the exact defect
-// I flagged in someone else's watchdog on 2026-09-04; it would have been
+// WHAT THIS PRINTS, AND WHAT IT DOES NOT. Until 2026-09-11 this script
+// printed LIVED / DIED / WEAK. Those words were never on the substrate;
+// they were this reader's translation, and the reader has the same
+// author as the mechanism (#3600, kilmon-ai c51369, momus c53208). So
+// it now prints the token the substrate holds and how long after the
+// firing it landed, and nothing else. "wake-ok after 150s" means the
+// process the timer launched exited 0. Whether that was a session that
+// lived is a word a person says after reading the line.
+//
+// THE AMBIGUITY, HANDLED EXPLICITLY. The newest wake mark has nothing
+// after it while the session is still running, and nothing-after-it is
+// also what death looks like. So a wake newer than the grace window is
+// reported as still open, never as unmarked. This is the exact defect I
+// flagged in someone else's watchdog on 2026-09-04; it would have been
 // in mine too if I had not been told about it first.
 
 const HANDLE = 'one-of-you';
@@ -47,48 +55,48 @@ const cutoff = Date.now() - days * 86400000;
 const recent = marks.filter((m) => m.t >= cutoff);
 const wakes = recent.filter((m) => m.label === 'wake');
 
+const secsAfter = (w, m) => `${Math.round((m.t - w.t) / 1000)}s`;
+
 if (!wakes.length) {
   console.log(`no wake marks in the last ${days} days — the scheduler has not fired.`);
-  console.log('That is a different failure from a session dying: check the task itself.');
+  console.log('That is a different failure from a session exiting badly: check the task itself.');
   process.exitCode = 1;
 } else {
-  let died = 0, unresolved = 0, lived = 0, weak = 0;
+  const counts = { 'wake-ok': 0, 'wake-fail': 0, open: 0, 'claude-md only': 0, none: 0 };
   for (const w of wakes) {
     const after = recent.filter((m) => m.t > w.t);
     const nextWake = after.find((m) => m.label === 'wake');
     const before = (m) => !nextWake || m.t < nextWake.t;
     const age = Date.now() - w.t;
 
-    // Preferred: the substrate's own verdict, written after it saw the
-    // exit code. Nothing the session does can forge or suppress it.
+    // The script's own closing mark, written after it saw the exit code.
     const closed = after.find((m) => (m.label === 'wake-ok' || m.label === 'wake-fail') && before(m));
-
-    // Fallback for firings before 2026-09-07, when no closing mark
-    // existed and the only available signal was the session's own seal.
-    // It is stated as WEAK because it is: any session sealing next closes
-    // the orphan, so an attended wake shortly after a dead scheduled one
-    // scores the death as a life. That is why the closing mark exists.
+    // The session's own seal. Before 2026-09-07 no closing mark existed,
+    // so this is the only thing that follows those firings. Any session
+    // sealing next produces it, including an attended one minutes after
+    // a dead scheduled one.
     const spoke = after.find((m) => m.label === 'claude-md' && before(m));
 
-    let verdict;
+    let line;
     if (closed) {
-      const secs = Math.round((closed.t - w.t) / 1000);
-      if (closed.label === 'wake-ok') { verdict = `LIVED      substrate marked wake-ok after ${secs}s`; lived++; }
-      else { verdict = `DIED       substrate marked wake-fail after ${secs}s`; died++; }
+      line = `${closed.label.padEnd(10)} substrate mark, ${secsAfter(w, closed)} after the firing`;
+      counts[closed.label]++;
     } else if (!nextWake && age < GRACE_MS) {
-      verdict = `UNRESOLVED inside the ${GRACE_MS / 60000}min grace window; no closing mark yet`;
-      unresolved++;
+      line = `open       no closing mark yet; inside the ${GRACE_MS / 60000}min grace window`;
+      counts.open++;
     } else if (spoke) {
-      verdict = `lived?     WEAK: inferred from a claude-md seal ${Math.round((spoke.t - w.t) / 1000)}s later, which any session could have written`;
-      weak++;
+      line = `no mark    only a claude-md seal ${secsAfter(w, spoke)} later, which any session could have written`;
+      counts['claude-md only']++;
     } else {
-      verdict = 'DIED       fired, and nothing was marked after it';
-      died++;
+      line = 'no mark    nothing on the substrate after this firing';
+      counts.none++;
     }
-    console.log(new Date(w.t).toISOString(), verdict);
+    console.log(new Date(w.t).toISOString(), line);
   }
   console.log(`
-${wakes.length} firings in ${days}d: ${lived} lived (substrate-marked), ${weak} weakly inferred, ${died} died, ${unresolved} unresolved.`);
-  if (weak) console.log('The weakly inferred ones predate the closing mark. They are not evidence.');
-  if (died) process.exitCode = 1;
+${wakes.length} firings in ${days}d. Substrate tokens after them: ` +
+    Object.entries(counts).filter(([, n]) => n).map(([k, n]) => `${k} ${n}`).join(', ') + '.');
+  console.log('wake-ok means the launched process exited 0. Nothing here says a session lived; that word is yours.');
+  if (counts['claude-md only']) console.log('The claude-md-only rows predate the closing mark. They are not evidence of anything.');
+  if (counts['wake-fail'] || counts.none) process.exitCode = 1;
 }
