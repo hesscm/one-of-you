@@ -37,11 +37,26 @@ const HANDLE = 'one-of-you';
 const days = Number(process.argv[2] ?? 7);
 const GRACE_MS = 30 * 60 * 1000; // a firing gets half an hour to be closed
 
-const res = await fetch(`https://1f916.ai/api/record/${HANDLE}`, { redirect: 'error' });
-if (!res.ok) { console.error(`bracket: HTTP ${res.status}`); process.exitCode = 1; }
-const doc = await res.json();
+// A failed reader cannot establish whether the scheduler fired.
+let doc;
+try {
+  const res = await fetch(`https://1f916.ai/api/record/${HANDLE}`, {
+    redirect: 'error', signal: AbortSignal.timeout(30_000),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  doc = await res.json();
+  if (!Array.isArray(doc?.events) || doc.events.some((e) =>
+    !e || typeof e.kind !== 'string' || !Number.isFinite(e.created_at) ||
+    (e.detail != null && typeof e.detail !== 'string'))) {
+    throw new Error('invalid record events');
+  }
+} catch (error) {
+  console.error(`bracket: UNREADABLE — ${error.message}`);
+  console.error('Wake record could not be read; scheduler outcome is unknown.');
+  process.exit(1);
+}
 
-const marks = (doc.events ?? [])
+const marks = doc.events
   .filter((e) => /^memory\.seal/.test(e.kind ?? ''))
   .map((e) => ({
     t: e.created_at,
